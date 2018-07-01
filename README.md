@@ -2,9 +2,9 @@
 A simple way to accept tips via the Lightning Network on your website. 
 
 If want to tip me you can use my LightningTip as below.
-(Ignore any https certificate errors as this is hosted on a free webserver and you will not be entering any sensitive data.)
-* [mainnet](https://raspibolt.epizy.com/LT/lightningTip.php)
-* [testnet](https://raspibolt.epizy.com/LT/lightningTip.php?testnet=1)
+
+* [mainnet](http://raspibolt.epizy.com/LT/lightningTip.php)
+* [testnet](http://raspibolt.epizy.com/LT/lightningTip.php?testnet=1)
 
 <img src="https://i.imgur.com/0mOEgTf.gif" width="240">
 
