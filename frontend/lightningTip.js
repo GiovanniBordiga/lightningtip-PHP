@@ -39,14 +39,14 @@ window.onload = function () {
 
     button.style.height = (button.clientHeight + 1) + "px";
     button.style.width = (button.clientWidth + 1) + "px";
- 
+
 };
 
 var testnet = getVal('testnet');  //see if GET param testnet is set  (URL?testnet=1)
-console.log('Testnet = ' + testnet); 
+console.log('Testnet = ' + testnet);
 if ( testnet !== null ) {
 	requestUrl = requestUrl + '?testnet=1';
-	console.log('requestUrl = ' + requestUrl ); 
+	console.log('requestUrl = ' + requestUrl );
 }
 
 // TODO: show invoice even if JavaScript is disabled
@@ -56,86 +56,90 @@ function getInvoice() {
     if (running === false) {
         running = true;
 
-        var tipValue = document.getElementById("lightningTipAmount");
- 
-        if (tipValue.value !== "") {
-            if (!isNaN(tipValue.value)) {
-                var request = new XMLHttpRequest();
+        var tipValue = document.getElementById("lightningTipAmount").value.trim();
 
-                request.onreadystatechange = function () {
-                    if (request.readyState === 4) {
-						//console.log("RESPONSE: " + request.responseText);
-                        try {
-                            var json = JSON.parse(request.responseText);
+        if (tipValue === "") {
+            showErrorMessage("No tip amount set");
+            return;
+        } else if (isNaN(tipValue)) {
+            showErrorMessage("Tip amount must be a number");
+            return;
+        } else if (tipValue < 1) {
+            showErrorMessage("Tip amount must be at least 1 sat");
+            return;
+        } else if (parseInt(tipValue).toString() != tipValue) {
+            showErrorMessage("Tip amount should be a whole number of sats (no decimals)");
+            return;
+        }
 
-                            if (request.status === 200) {
-                                console.log("Got invoice: " + json.Invoice);
-                                console.log("Invoice expires in: " + json.Expiry);
-                                console.log("Starting listening for invoice to get settled");
-								
-                                listenInvoiceSettled(json.r_hash_str);
+        var request = new XMLHttpRequest();
 
-                                invoice = json.Invoice;
+        request.onreadystatechange = function () {
+            if (request.readyState === 4) {
+                //console.log("RESPONSE: " + request.responseText);
+                try {
+                    var json = JSON.parse(request.responseText);
 
-                                // Update UI
-                                var wrapper = document.getElementById("lightningTip");
+                    if (request.status === 200) {
+                        console.log("Got invoice: " + json.Invoice);
+                        console.log("Invoice expires in: " + json.Expiry);
+                        console.log("Starting listening for invoice to get settled");
 
-                                wrapper.innerHTML = "<a>Your tip request</a>";
-                                wrapper.innerHTML += "<input type='text' class='lightningTipInput' id='lightningTipInvoice' onclick='copyInvoiceToClipboard()' value='" + invoice + "' readonly>";
-                                wrapper.innerHTML += "<div id='lightningTipQR'></div>";
+                        listenInvoiceSettled(json.r_hash_str);
 
-                                wrapper.innerHTML += "<div id='lightningTipTools'>" +
-                                    "<button class='lightningTipButton' id='lightningTipCopy' onclick='copyInvoiceToClipboard()'>Copy</button>" +
-                                    "<button class='lightningTipButton' id='lightningTipOpen'>Open</button>" +
-                                    "<a id='lightningTipExpiry'></a>" +
-                                    "</div>";
+                        invoice = json.Invoice;
 
-                                starTimer(json.Expiry, document.getElementById("lightningTipExpiry"));
+                        // Update UI
+                        var wrapper = document.getElementById("lightningTip");
 
-                                // Fixes bug which caused the content of #lightningTipTools to be visually outside of #lightningTip
-                                document.getElementById("lightningTipTools").style.height = document.getElementById("lightningTipCopy").clientHeight + "px";
+                        wrapper.innerHTML = "<a>Your tip request</a>";
+                        wrapper.innerHTML += "<input type='text' class='lightningTipInput' id='lightningTipInvoice' onclick='copyInvoiceToClipboard()' value='" + invoice + "' readonly>";
+                        wrapper.innerHTML += "<div id='lightningTipQR'></div>";
 
-                                document.getElementById("lightningTipOpen").onclick = function () {
-                                    location.href = "lightning:" + json.Invoice;
-                                };
+                        wrapper.innerHTML += "<div id='lightningTipTools'>" +
+                            "<button class='lightningTipButton' id='lightningTipCopy' onclick='copyInvoiceToClipboard()'>Copy</button>" +
+                            "<button class='lightningTipButton' id='lightningTipOpen'>Open</button>" +
+                            "<a id='lightningTipExpiry'></a>" +
+                            "</div>";
 
-                                showQRCode();
+                        startTimer(json.Expiry, document.getElementById("lightningTipExpiry"));
 
-                                running = false;
+                        // Fixes bug which caused the content of #lightningTipTools to be visually outside of #lightningTip
+                        document.getElementById("lightningTipTools").style.height = document.getElementById("lightningTipCopy").clientHeight + "px";
 
-                            } else {
-                                showErrorMessage(json.Error);
-                            }
+                        document.getElementById("lightningTipOpen").onclick = function () {
+                            location.href = "lightning:" + json.Invoice;
+                        };
 
-                        } catch (exception) {
-                            console.error(exception);
+                        showQRCode();
 
-                            showErrorMessage("Failed to reach backend");
-                        }
+                        running = false;
 
+                    } else {
+                        showErrorMessage(json.Error);
                     }
 
-                };
+                } catch (exception) {
+                    console.error(exception);
 
-                request.open("POST", requestUrl , true);
-				request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                var params = "Action=getinvoice&Amount=" + parseInt(tipValue.value) + "&Message=" + encodeURIComponent(document.getElementById("lightningTipMessage").innerText);
-				console.log(params);
-				request.send(params);				
+                    showErrorMessage("Failed to reach backend");
+                }
 
-                var button = document.getElementById("lightningTipGetInvoice");
-
-                defaultGetInvoice = button.innerHTML;
-
-                button.innerHTML = "<div class='spinner'></div>";
-
-            } else {
-                showErrorMessage("Tip amount must be a number");
             }
 
-        } else {
-            showErrorMessage("No tip amount set");
-        }
+        };
+
+        request.open("POST", requestUrl , true);
+        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        var params = "Action=getinvoice&Amount=" + parseInt(tipValue) + "&Message=" + encodeURIComponent(document.getElementById("lightningTipMessage").innerText);
+        console.log(params);
+        request.send(params);
+
+        var button = document.getElementById("lightningTipGetInvoice");
+
+        defaultGetInvoice = button.innerHTML;
+
+        button.innerHTML = "<div class='spinner'></div>";
 
     } else {
         console.warn("Last request still pending");
@@ -146,7 +150,7 @@ function getInvoice() {
 function listenInvoiceSettled(r_hash_str) {
         var interval = setInterval(function () {
             var request = new XMLHttpRequest();
-		
+
 	    //Prevent multiple calls for same invoice settled over slow networks.
 	    var IsSettled = false;
             if ( IsSettled == true) {
@@ -169,8 +173,8 @@ function listenInvoiceSettled(r_hash_str) {
 
             };
 
-            
-			
+
+
 			request.open("POST", requestUrl, true);
 			request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             var params = "Action=invoicesettled&r_hash_str=" + r_hash_str;
@@ -189,7 +193,7 @@ function showThankYouScreen() {
     wrapper.innerHTML += "<a id='lightningTipFinished'>Thank you for your tip!</a>";
 }
 
-function starTimer(duration, element) {
+function startTimer(duration, element) {
     showTimer(duration, element);
 
     var interval = setInterval(function () {
