@@ -85,6 +85,7 @@ define('INVOICE_MACAROON_HEX',			//No spaces
        'CHANGE_ME'
 	   );
 define('EXPIRY','1800');			//seconds
+define('TESTNET', FALSE)
 
 //Optional EMAIL notifications
 // To disable, leave EMAIL_TO as '' (empty string)
