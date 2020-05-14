@@ -1,7 +1,7 @@
 # LightningTip-PHP
 A simple way to accept tips via the Lightning Network on your website. 
 
-If want to see LightningTip in action, you can [tip me a few sats!](http://deadcat.epizy.com/LT/lightningTip.php) ⚡
+If want to see LightningTip in action, you can [tip me a few sats!](http://deadcat.epizy.com/) ⚡
 
 <img src="https://i.imgur.com/0mOEgTf.gif" width="240">
 
