@@ -119,6 +119,7 @@ function getPaymentRequest($memo='',$satoshi=0,$expiry=EXPIRY){
  curl_setopt($ch, CURLOPT_POST, 1);
  curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+ curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
     "Grpc-Metadata-macaroon: $invoice_macaroon_hex"
     ));
@@ -135,6 +136,7 @@ function lookupInvoice($r_hash_str){
  $ch = curl_init("https://$lnd_ip:$lnd_port/v1/invoice/$r_hash_str");
  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);	
  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+ curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
     "Grpc-Metadata-macaroon: $invoice_macaroon_hex"
     ));
