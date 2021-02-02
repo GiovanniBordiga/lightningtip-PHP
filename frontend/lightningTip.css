@@ -2,6 +2,7 @@ body{
     background-image: url('https://dvecj1kzufveh.cloudfront.net/default2/background.jpg');
     background-position: center center;
     background-size: cover;
+    background-attachment: fixed;
     position: absolute;
     height: auto;
     left: 0;
